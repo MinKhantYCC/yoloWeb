@@ -5,7 +5,7 @@ import math
 from streamlit_webrtc import webrtc_streamer,RTCConfiguration
 import av
 
-model = YOLO('./yolo_weights/yolov8n.pt')
+model = YOLO('yolov8n.pt')
 
 # cap = cv2.VideoCapture(0)
 # cap.set(3,640) # width
