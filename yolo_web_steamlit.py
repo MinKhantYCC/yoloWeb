@@ -2,8 +2,9 @@ from ultralytics import YOLO
 import cv2
 import cvzone
 import math
-from streamlit_webrtc import webrtc_streamer,RTCConfiguration
+from streamlit_webrtc import webrtc_streamer,RTCConfiguration, WebRtcMode
 import av
+from twilio_tokens import get_ice_servers
 
 model = YOLO('yolov8n.pt')
 
@@ -46,26 +47,35 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
               "teddy bear", "hair drier", "toothbrush"
               ]
 
-webrtc_streamer(key='Video', video_processor_factory=VideoProcess,
-                rtc_configuration=RTCConfiguration(
-                    {"username": "ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e",
-                    "ice_servers": [{'url': 'stun:global.stun.twilio.com:3478', 
-                                     'urls': 'stun:global.stun.twilio.com:3478'}, 
-                                     {'url': 'turn:global.turn.twilio.com:3478?transport=udp', 
-                                      'username': 'ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e', 
-                                      'urls': 'turn:global.turn.twilio.com:3478?transport=udp', 
-                                      'credential': 'MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig='}, 
-                                    {'url': 'turn:global.turn.twilio.com:3478?transport=tcp', 
-                                     'username': 'ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e', 
-                                     'urls': 'turn:global.turn.twilio.com:3478?transport=tcp', 
-                                     'credential': 'MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig='}, 
-                                    {'url': 'turn:global.turn.twilio.com:443?transport=tcp', 
-                                     'username': 'ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e', 
-                                     'urls': 'turn:global.turn.twilio.com:443?transport=tcp', 
-                                     'credential': 'MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig='}],
-                    "date_updated": "2023-11-10 17:47:31+00:00",
-                    "account_sid": "AC049053b997790d028fc79f82a0f5561c",
-                    "ttl": "86400",
-                    "date_created": "2023-11-10 17:47:31+00:00",
-                    "password": "MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig="
-                    }))
+webrtc_ctx = webrtc_streamer(
+    key="object-detection",
+    mode=WebRtcMode.SENDRECV,
+    rtc_configuration={"iceServers": get_ice_servers()},
+    video_frame_callback=VideoProcess,
+    media_stream_constraints={"video": True, "audio": False},
+    async_processing=True,
+)
+
+# webrtc_streamer(key='Video', video_processor_factory=VideoProcess,
+#                 rtc_configuration=RTCConfiguration(
+#                     {"username": "ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e",
+#                     "ice_servers": [{'url': 'stun:global.stun.twilio.com:3478', 
+#                                      'urls': 'stun:global.stun.twilio.com:3478'}, 
+#                                      {'url': 'turn:global.turn.twilio.com:3478?transport=udp', 
+#                                       'username': 'ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e', 
+#                                       'urls': 'turn:global.turn.twilio.com:3478?transport=udp', 
+#                                       'credential': 'MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig='}, 
+#                                     {'url': 'turn:global.turn.twilio.com:3478?transport=tcp', 
+#                                      'username': 'ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e', 
+#                                      'urls': 'turn:global.turn.twilio.com:3478?transport=tcp', 
+#                                      'credential': 'MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig='}, 
+#                                     {'url': 'turn:global.turn.twilio.com:443?transport=tcp', 
+#                                      'username': 'ecf7567828a9780516808fad84421c900b3df7283330a7a93545168c943c906e', 
+#                                      'urls': 'turn:global.turn.twilio.com:443?transport=tcp', 
+#                                      'credential': 'MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig='}],
+#                     "date_updated": "2023-11-10 17:47:31+00:00",
+#                     "account_sid": "AC049053b997790d028fc79f82a0f5561c",
+#                     "ttl": "86400",
+#                     "date_created": "2023-11-10 17:47:31+00:00",
+#                     "password": "MzXI3UD8+yGhI1qHCnUsCWLgBJOTCBMLzfow6X6/lig="
+#                     }))
